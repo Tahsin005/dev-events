@@ -5,11 +5,32 @@ import { cacheLife } from "next/cache";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
+const getEvents = async () => {
+  const baseUrl = BASE_URL ? BASE_URL.replace(/\/$/, '') : '';
+
+  try {
+    const response = await fetch(`${baseUrl}/api/events`);
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json().catch(() => null);
+
+    if (!data || !Array.isArray(data.events)) {
+      return [];
+    }
+
+    return data.events;
+  } catch {
+    return [];
+  }
+}
+
 const Home = async () => {
   'use cache';
   cacheLife('hours')
-  const response = await fetch(`${BASE_URL}/api/events`);
-  const { events } = await response.json();
+  const events = await getEvents();
 
   return (
     <section>
